@@ -1,5 +1,6 @@
 package takeaway.server.gameofthree.dto;
 
+import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 
 import lombok.Data;
@@ -10,7 +11,13 @@ import lombok.Data;
  */
 @Data
 public class Player {
+	
+	public Player(String email) {
+		super();
+		this.email = email;
+	}
 	@NotBlank
+	@Email
 	String email;
 	@NotBlank
 	String ip;
