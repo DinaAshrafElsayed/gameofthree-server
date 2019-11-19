@@ -32,16 +32,12 @@ public class RegistrationController {
 
 	@PostMapping(value = "/takeaway/v1/register", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> register(@Valid @RequestBody Player player) {
-		// TODO make a service layer to generate token and save player in list of
-		// players
 		String token = jwtTokenUtil.generateToken(player);
 		return ResponseEntity.ok(new JwtResponse(token));
 	}
 
 	@DeleteMapping(value = "/takeaway/v1/unregister")
-	public ResponseEntity<?> unregister(@RequestParam(name = "uuid") @NotBlank String uuid) {
-		// TODO remove from player lists and make sure that player is not in any game
-		// if in any game end it and make other player as winner
+	public ResponseEntity<?> unregister() {
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 }

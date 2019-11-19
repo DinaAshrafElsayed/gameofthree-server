@@ -15,14 +15,6 @@ import lombok.Data;
 @Data
 public class Player implements Serializable {
 
-	public Player() {
-	}
-
-	public Player(String email) {
-		super();
-		this.email = email;
-	}
-
 	@NotBlank
 	@Email
 	String email;
