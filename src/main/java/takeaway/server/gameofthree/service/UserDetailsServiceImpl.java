@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-	public final String ROLE = "ADMIN";
+	public final String ROLE = "PLAYER";
 
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
