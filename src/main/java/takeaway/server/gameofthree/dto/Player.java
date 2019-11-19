@@ -17,9 +17,11 @@ public class Player implements Serializable {
 
 	@NotBlank
 	@Email
-	String email;
+	private String email;
 	@NotBlank
-	String ip;
+	private String ip;
 	@NotBlank
-	String port;
+	private String port;
+
+	private String currentGameId;
 }

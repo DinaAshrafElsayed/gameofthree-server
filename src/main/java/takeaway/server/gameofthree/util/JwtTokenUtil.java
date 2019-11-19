@@ -15,11 +15,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import takeaway.server.gameofthree.dto.Player;
 
-/**
- * 
- * @author El-sayedD
- *
- */
 
 @Component
 public class JwtTokenUtil implements Serializable {
@@ -43,7 +38,7 @@ public class JwtTokenUtil implements Serializable {
 		return claimsResolver.apply(claims);
 	}
 
-	// for retrieveing any information from token we will need the secret key
+	// for retrieving any information from token we will need the secret key
 	private Claims getAllClaimsFromToken(String token) {
 		return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
 	}

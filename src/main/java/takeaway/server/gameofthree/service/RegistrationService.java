@@ -1,16 +1,16 @@
 package takeaway.server.gameofthree.service;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import takeaway.server.gameofthree.dao.GameRepo;
+import takeaway.server.gameofthree.dao.PlayerRepo;
+import takeaway.server.gameofthree.dto.Game;
 import takeaway.server.gameofthree.dto.Player;
 import takeaway.server.gameofthree.exception.BusinessException;
 import takeaway.server.gameofthree.util.JwtTokenUtil;
@@ -23,18 +23,20 @@ import takeaway.server.gameofthree.util.JwtTokenUtil;
 @Service
 public class RegistrationService {
 
-	Map<String, Player> registeredPlayersMap;
-	Map<String, Player> avaliablePlayersMap;
+	@Qualifier("PlayerRepoDefaultImpl")
+	private PlayerRepo playerRepo;
+
+	@Qualifier("GameRepoDefaultImpl")
+	private GameRepo gameRepo;
 
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
 
 	public String register(Player player) throws BusinessException {
 		String token = null;
-		if (!registeredPlayersMap.containsKey(player.getEmail())) {
+		if (playerRepo.findPlayerInRegistery(player.getEmail()) == null) {
 			token = jwtTokenUtil.generateToken(player);
-			registeredPlayersMap.put(player.getEmail(), player);
-			avaliablePlayersMap.put(player.getEmail(), player);
+			playerRepo.addPlayerToRegistery(player);
 		} else {
 			throw new BusinessException("user already registered", HttpStatus.BAD_REQUEST);
 		}
@@ -44,26 +46,18 @@ public class RegistrationService {
 	public void unregister() throws BusinessException {
 		UserDetails user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String email = user.getUsername();
-		if (registeredPlayersMap.containsKey(email)) {
-			registeredPlayersMap.remove(email);
-			if(avaliablePlayersMap.containsKey(email)) {
-				avaliablePlayersMap.remove(email);
-			}else {
-				//TODO
-				// remove from game
-				// make sure that player is not in any game (game map)
-				// if in any game end it and make other player as winner
+		Player player = playerRepo.findPlayerInRegistery(email);
+		if (player != null && player.getCurrentGameId() != null && !StringUtils.isEmpty(player.getCurrentGameId())) {
+			Game game = gameRepo.findGamePlayedBy(player);
+			if (game != null) {
+				// TODO
+				// end Game and announce other player as winner
+				gameRepo.RemoveGame(game.getGameId());
 			}
-			
+			playerRepo.removePlayerFromRegistery(email);
+
 		} else {
 			throw new BusinessException("user doesn't exist", HttpStatus.BAD_REQUEST);
 		}
 	}
-
-	@PostConstruct
-	public void initaleMaps() {
-		registeredPlayersMap = new ConcurrentHashMap<>();
-		avaliablePlayersMap = new ConcurrentHashMap<>();
-	}
-
 }
