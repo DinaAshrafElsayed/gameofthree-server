@@ -8,7 +8,6 @@ import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Repository;
 
 import takeaway.server.gameofthree.dto.Game;
-import takeaway.server.gameofthree.dto.Player;
 
 @Repository("GameRepoDefaultImpl")
 public class GameRepoDefaultImpl implements GameRepo {
@@ -22,13 +21,13 @@ public class GameRepoDefaultImpl implements GameRepo {
 
 	@Override
 	public boolean saveGame(Game game) {
-		// TODO Auto-generated method stub
-		return gameMap.put(game.getGameId(), game) != null ? true : false;
+		gameMap.put(game.getGameId(), game);
+		return gameMap.containsKey(game.getGameId());
 	}
 
 	@Override
 	public boolean RemoveGameByGameId(String gameId) {
-		return  gameMap.remove(gameId) != null ? true : false;;
+		return gameMap.remove(gameId) != null ? true : false;
 	}
 
 	@Override

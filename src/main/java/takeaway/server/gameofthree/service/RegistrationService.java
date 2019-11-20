@@ -13,7 +13,7 @@ import takeaway.server.gameofthree.dto.Game;
 import takeaway.server.gameofthree.dto.Player;
 import takeaway.server.gameofthree.exception.BusinessException;
 import takeaway.server.gameofthree.exception.UserAlreadyRegisteredException;
-import takeaway.server.gameofthree.exception.UserDoesnotExistExecption;
+import takeaway.server.gameofthree.exception.UserDoesnotExistException;
 import takeaway.server.gameofthree.util.JwtTokenUtil;
 
 /**
@@ -24,9 +24,11 @@ import takeaway.server.gameofthree.util.JwtTokenUtil;
 @Service
 public class RegistrationService {
 
+	@Autowired
 	@Qualifier("PlayerRepoDefaultImpl")
 	private PlayerRepo playerRepo;
 
+	@Autowired
 	@Qualifier("GameRepoDefaultImpl")
 	private GameRepo gameRepo;
 
@@ -37,8 +39,9 @@ public class RegistrationService {
 		String token = null;
 		if (playerRepo.findPlayerInRegisteryByEmail(player.getEmail()) == null) {
 			token = jwtTokenUtil.generateToken(player);
+			player.setAvailable(true);
 			playerRepo.addPlayerToRegistery(player);
-			playerRepo.savePlayerAsAvailable(player);
+			playerRepo.markPlayerAsAvailable(player);
 		} else {
 			throw new UserAlreadyRegisteredException();
 		}
@@ -60,10 +63,10 @@ public class RegistrationService {
 					gameRepo.RemoveGameByGameId(gameId);
 				}
 			}
-			playerRepo.savePlayerAsUnavailable(player);
+			playerRepo.markPlayerAsUnavailable(player);
 			playerRepo.removePlayerFromRegisteryByPlayerEmail(email);
 		} else {
-			throw new UserDoesnotExistExecption();
+			throw new UserDoesnotExistException();
 		}
 	}
 }

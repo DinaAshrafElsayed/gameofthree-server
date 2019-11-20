@@ -24,4 +24,5 @@ public class Player implements Serializable {
 	private String port;
 
 	private String currentGameId;
+	private boolean isAvailable;
 }

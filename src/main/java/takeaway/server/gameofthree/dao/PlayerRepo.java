@@ -8,9 +8,9 @@ public interface PlayerRepo {
 
 	Player findPlayerInRegisteryByEmail(String playerEmail);
 
-	Player savePlayerAsAvailable(Player player);
+	Player markPlayerAsAvailable(Player player);
 
-	Player savePlayerAsUnavailable(Player player);
+	Player markPlayerAsUnavailable(Player player);
 
 	boolean addPlayerToRegistery(Player player);
 
@@ -19,5 +19,11 @@ public interface PlayerRepo {
 	boolean isPlayerAvaliable(String playerEmail);
 
 	List<Player> getAvaliablePlayers();
+
+	boolean updatePlayerByGameId(String playerEmail, String gameId);
+	
+	boolean updatePlayerGameIdAndAvailability(String playerEmail, String gameId, boolean isAvailable);
+
+	void updatePlayersList(List<Player> players);
 
 }

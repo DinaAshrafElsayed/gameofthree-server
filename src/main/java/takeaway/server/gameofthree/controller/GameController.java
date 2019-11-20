@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import takeaway.server.gameofthree.dto.GameInvitationStatusEnum;
+import takeaway.server.gameofthree.dto.StartGameResponse;
+import takeaway.server.gameofthree.exception.BusinessException;
 import takeaway.server.gameofthree.service.GameOfThreeService;
 
 /**
@@ -26,10 +29,11 @@ public class GameController {
 	@Autowired
 	private GameOfThreeService gameOfThreeService;
 
-	@PostMapping(value = "/takeaway/v1/startGame", consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> startGame(@RequestParam(name = "email") @NotBlank String player2,
-			@RequestParam(name = "initalValue") @NotBlank String initalValue) {
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	@PostMapping(value = "/takeaway/v1/invite", consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> startGame(@RequestParam(name = "email") @NotBlank String email,
+			@RequestParam(name = "initalValue", required = true) int initalValue )  throws BusinessException {
+		GameInvitationStatusEnum status = gameOfThreeService.startGame(email, initalValue);
+		return ResponseEntity.ok(new StartGameResponse(status.name()));
 	}
 
 	@GetMapping(value = "/takeaway/v1/availablePlayers")

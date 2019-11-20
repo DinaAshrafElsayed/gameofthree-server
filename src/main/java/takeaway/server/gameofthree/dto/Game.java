@@ -1,5 +1,7 @@
 package takeaway.server.gameofthree.dto;
 
+import java.util.UUID;
+
 import lombok.Data;
 /**
  * 
@@ -15,5 +17,7 @@ public class Game {
 	private String gameId;
 	public Game() {
 		//generate game uniqueID
+		UUID u = UUID.randomUUID();
+		gameId = u.toString();
 	}
 }

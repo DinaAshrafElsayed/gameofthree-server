@@ -49,13 +49,50 @@ public class PlayerRepoDefaultImpl implements PlayerRepo {
 	}
 
 	@Override
-	public Player savePlayerAsAvailable(Player player) {
+	public Player markPlayerAsAvailable(Player player) {
 		return availablePlayersMap.put(player.getEmail(), player);
 	}
 
 	@Override
-	public Player savePlayerAsUnavailable(Player player) {
+	public Player markPlayerAsUnavailable(Player player) {
 		return availablePlayersMap.remove(player.getEmail());
+	}
+
+	@Override
+	public boolean updatePlayerByGameId(String playerEmail, String gameId) {
+		if (registeredPlayersMap.containsKey(playerEmail)) {
+			Player player = registeredPlayersMap.get(playerEmail);
+			player.setCurrentGameId(gameId);
+			return registeredPlayersMap.put(playerEmail, player) != null ? true : false;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean updatePlayerGameIdAndAvailability(String playerEmail, String gameId, boolean isAvailable) {
+		if (registeredPlayersMap.containsKey(playerEmail)) {
+			Player player = registeredPlayersMap.get(playerEmail);
+			player.setCurrentGameId(gameId);
+			if (isAvailable) {
+				availablePlayersMap.put(playerEmail, player);
+			} else {
+				availablePlayersMap.remove(playerEmail);
+			}
+			return registeredPlayersMap.put(playerEmail, player) != null ? true : false;
+		}
+		return false;
+	}
+
+	@Override
+	public void updatePlayersList(List<Player> players) {
+		for (Player player : players) {
+			if (player.isAvailable()) {
+				availablePlayersMap.put(player.getEmail(), player);
+			} else {
+				availablePlayersMap.remove(player.getEmail());
+			}
+			registeredPlayersMap.put(player.getEmail(), player);
+		}
 	}
 
 }
