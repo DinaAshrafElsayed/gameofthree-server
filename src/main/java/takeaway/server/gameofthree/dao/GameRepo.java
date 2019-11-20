@@ -7,8 +7,8 @@ public interface GameRepo {
 
 	boolean saveGame(Game game);
 
-	boolean RemoveGame(String gameId);
+	boolean RemoveGameByGameId(String gameId);
 
-	Game findGamePlayedBy(Player player);
+	Game findGameById(String gameId);
 
 }

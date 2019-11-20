@@ -35,7 +35,7 @@ public class RegistrationService {
 
 	public String register(Player player) throws BusinessException {
 		String token = null;
-		if (playerRepo.findPlayerInRegistery(player.getEmail()) == null) {
+		if (playerRepo.findPlayerInRegisteryByEmail(player.getEmail()) == null) {
 			token = jwtTokenUtil.generateToken(player);
 			playerRepo.addPlayerToRegistery(player);
 			playerRepo.savePlayerAsAvailable(player);
@@ -48,16 +48,20 @@ public class RegistrationService {
 	public void unregister() throws BusinessException {
 		UserDetails user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String email = user.getUsername();
-		Player player = playerRepo.findPlayerInRegistery(email);
-		if (player != null && player.getCurrentGameId() != null && !StringUtils.isEmpty(player.getCurrentGameId())) {
-			Game game = gameRepo.findGamePlayedBy(player);
-			if (game != null) {
-				// TODO
-				// end Game and announce other player as winner
-				gameRepo.RemoveGame(game.getGameId());
+		Player player = playerRepo.findPlayerInRegisteryByEmail(email);
+		if (player != null) {
+			String gameId = player.getCurrentGameId();
+			if (gameId != null && !StringUtils.isEmpty(gameId)) {
+				Game game = gameRepo.findGameById(gameId);
+				if (game != null) {
+					/*
+					 * TODO end Game and announce other player as winner
+					 */
+					gameRepo.RemoveGameByGameId(gameId);
+				}
 			}
-			playerRepo.removePlayerFromRegistery(email);
 			playerRepo.savePlayerAsUnavailable(player);
+			playerRepo.removePlayerFromRegisteryByPlayerEmail(email);
 		} else {
 			throw new UserDoesnotExistExecption();
 		}

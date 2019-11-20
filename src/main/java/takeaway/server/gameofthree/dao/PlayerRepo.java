@@ -6,7 +6,7 @@ import takeaway.server.gameofthree.dto.Player;
 
 public interface PlayerRepo {
 
-	Player findPlayerInRegistery(String playerEmail);
+	Player findPlayerInRegisteryByEmail(String playerEmail);
 
 	Player savePlayerAsAvailable(Player player);
 
@@ -14,7 +14,7 @@ public interface PlayerRepo {
 
 	boolean addPlayerToRegistery(Player player);
 
-	boolean removePlayerFromRegistery(String playerEmail);
+	boolean removePlayerFromRegisteryByPlayerEmail(String playerEmail);
 
 	boolean isPlayerAvaliable(String playerEmail);
 

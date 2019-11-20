@@ -27,13 +27,12 @@ public class GameRepoDefaultImpl implements GameRepo {
 	}
 
 	@Override
-	public boolean RemoveGame(String gameId) {
+	public boolean RemoveGameByGameId(String gameId) {
 		return  gameMap.remove(gameId) != null ? true : false;;
 	}
 
 	@Override
-	public Game findGamePlayedBy(Player player) {
-		String gameId = player.getCurrentGameId();
+	public Game findGameById(String gameId) {
 		return gameMap.get(gameId);
 	}
 

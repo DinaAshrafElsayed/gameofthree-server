@@ -2,6 +2,7 @@ package takeaway.server.gameofthree.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,7 +38,7 @@ public class GameOfThreeService {
 		if(playerIsAvaliable) {
 			UserDetails user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			String senderEmail = user.getUsername();
-			Player receiver = playerRepo.findPlayerInRegistery(playerTwoEmail);
+			Player receiver = playerRepo.findPlayerInRegisteryByEmail(playerTwoEmail);
 			boolean accepted = communicationService.AcceptGameInvitation(senderEmail, receiver);
 			// send accept Request to player2
 			if(accepted) {

@@ -29,7 +29,7 @@ public class PlayerRepoDefaultImpl implements PlayerRepo {
 	}
 
 	@Override
-	public boolean removePlayerFromRegistery(String playerEmail) {
+	public boolean removePlayerFromRegisteryByPlayerEmail(String playerEmail) {
 		return registeredPlayersMap.remove(playerEmail) != null ? true : false;
 	}
 
@@ -39,7 +39,7 @@ public class PlayerRepoDefaultImpl implements PlayerRepo {
 	}
 
 	@Override
-	public Player findPlayerInRegistery(String playerEmail) {
+	public Player findPlayerInRegisteryByEmail(String playerEmail) {
 		return registeredPlayersMap.get(playerEmail);
 	}
 
