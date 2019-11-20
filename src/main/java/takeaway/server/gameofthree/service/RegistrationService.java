@@ -2,7 +2,6 @@ package takeaway.server.gameofthree.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,8 @@ import takeaway.server.gameofthree.dao.PlayerRepo;
 import takeaway.server.gameofthree.dto.Game;
 import takeaway.server.gameofthree.dto.Player;
 import takeaway.server.gameofthree.exception.BusinessException;
+import takeaway.server.gameofthree.exception.UserAlreadyRegisteredException;
+import takeaway.server.gameofthree.exception.UserDoesnotExistExecption;
 import takeaway.server.gameofthree.util.JwtTokenUtil;
 
 /**
@@ -37,8 +38,9 @@ public class RegistrationService {
 		if (playerRepo.findPlayerInRegistery(player.getEmail()) == null) {
 			token = jwtTokenUtil.generateToken(player);
 			playerRepo.addPlayerToRegistery(player);
+			playerRepo.savePlayerAsAvailable(player);
 		} else {
-			throw new BusinessException("user already registered", HttpStatus.BAD_REQUEST);
+			throw new UserAlreadyRegisteredException();
 		}
 		return token;
 	}
@@ -55,9 +57,9 @@ public class RegistrationService {
 				gameRepo.RemoveGame(game.getGameId());
 			}
 			playerRepo.removePlayerFromRegistery(email);
-
+			playerRepo.savePlayerAsUnavailable(player);
 		} else {
-			throw new BusinessException("user doesn't exist", HttpStatus.BAD_REQUEST);
+			throw new UserDoesnotExistExecption();
 		}
 	}
 }

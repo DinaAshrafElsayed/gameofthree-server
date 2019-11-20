@@ -25,14 +25,11 @@ public class PlayerRepoDefaultImpl implements PlayerRepo {
 
 	@Override
 	public boolean addPlayerToRegistery(Player player) {
-		savePlayerAsAvailable(player);
 		return registeredPlayersMap.put(player.getEmail(), player) != null ? true : false;
-		
 	}
 
 	@Override
 	public boolean removePlayerFromRegistery(String playerEmail) {
-		availablePlayersMap.remove(playerEmail);
 		return registeredPlayersMap.remove(playerEmail) != null ? true : false;
 	}
 
