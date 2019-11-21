@@ -10,7 +10,7 @@ public class GameService {
 		 * validate input from previous one (matches rule (-1,0,1)) and divisible by 3
 		 * get other player and make sure he is still online
 		 * communicate with other player and send data to him
-		 * in case of win I should notify both players
+		 * in case of win( value == 3)  I should notify both players
 		 */
 	}
 
