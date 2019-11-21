@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import takeaway.server.gameofthree.dto.GameInvitationStatusEnum;
 import takeaway.server.gameofthree.dto.StartGameResponse;
 import takeaway.server.gameofthree.exception.BusinessException;
-import takeaway.server.gameofthree.service.GameOfThreeService;
+import takeaway.server.gameofthree.service.GameInvitationService;
 
 /**
  * 
@@ -28,7 +28,7 @@ import takeaway.server.gameofthree.service.GameOfThreeService;
 public class GameController {
 
 	@Autowired
-	private GameOfThreeService gameOfThreeService;
+	private GameInvitationService gameOfThreeService;
 
 	@PostMapping(value = "/takeaway/v1/invite/{email}/play", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> startGame(@PathVariable(name = "email") @NotBlank String email,

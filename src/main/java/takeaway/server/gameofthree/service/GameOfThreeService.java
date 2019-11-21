@@ -1,109 +1,111 @@
 package takeaway.server.gameofthree.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import takeaway.server.gameofthree.dao.GameRepo;
 import takeaway.server.gameofthree.dao.PlayerRepo;
 import takeaway.server.gameofthree.dto.Game;
-import takeaway.server.gameofthree.dto.GameInvitationStatusEnum;
 import takeaway.server.gameofthree.dto.Player;
 import takeaway.server.gameofthree.exception.BusinessException;
-import takeaway.server.gameofthree.exception.GameCreationException;
-import takeaway.server.gameofthree.exception.PlayerUnavailableException;
-import takeaway.server.gameofthree.exception.UserDoesnotExistException;
+import takeaway.server.gameofthree.exception.NoGameExistsException;
+import takeaway.server.gameofthree.exception.NotUserTurnException;
+import takeaway.server.gameofthree.exception.RulesViolatedException;
+import takeaway.server.gameofthree.util.GameOfThreeUtil;
 
-/**
- * 
- * @author El-sayedD
- *
- */
 @Service
 public class GameOfThreeService {
 
 	@Autowired
-	@Qualifier("PlayerRepoDefaultImpl")
-	private PlayerRepo playerRepo;
+	private CommunicationService communicationService;
+
+	@Autowired
+	private GameOfThreeUtil gameOfThreeUtil;
 
 	@Autowired
 	@Qualifier("GameRepoDefaultImpl")
 	private GameRepo gameRepo;
 
 	@Autowired
-	private CommunicationService communicationService;
+	@Qualifier("PlayerRepoDefaultImpl")
+	private PlayerRepo playerRepo;
 
-	public List<Player> getAvaliablePlayer() {
-		/*FIXME remove sender email from list*/
-		return playerRepo.getAvaliablePlayers();
-	}
+	/**
+	 * @param value
+	 *            new value of game
+	 * @throw NoGameExistsException in case that user has no ongoing game
+	 * 
+	 * @throws NotUserTurnException
+	 *             in case that user is sending request and it's not his turn yet
+	 * @throws RulesNotAppliedException
+	 *             in case rule not matched make sure game is still in progress no
+	 *             winner announced yet( value !=1) validate input from previous one
+	 *             (matches rule (-1,0,1)) and divisible by 3
+	 * 
+	 */
+	public void play(int value) throws BusinessException {
+		String senderEmail = gameOfThreeUtil.extractSenderEmailFromSecurityContext();
+		Player sender = gameOfThreeUtil.retrievePlayerIfRegisteredAndAvailable(senderEmail);
+		checkIfPlayerHasAnOngoingGame(sender);
+		Game game = gameRepo.findGameById(sender.getCurrentGameId());
+		checkIfItIsPlayerTurn(game, senderEmail);
+		applyRules(game, value);
+		value /= 3;
 
-	public GameInvitationStatusEnum startGame(String receiverEmail, int initalValue) throws BusinessException {
-		/*TODO make sure receiver and sender are not same person*/
-		String senderEmail = extractSenderEmailFromSecurityContext();
-		Player receiver = retrievePlayerIfRegisteredAndAvailable(receiverEmail);
-		GameInvitationStatusEnum status = sendGameInvitation(senderEmail, receiver);
-		if (GameInvitationStatusEnum.ACCEPTED.equals(status)) {
-			startGame(receiverEmail, senderEmail, initalValue);
+		String playerTwoEmail = getPlayerTwoEmail(senderEmail, game);
+		Player playerTwo = playerRepo.findPlayerInRegisteryByEmail(playerTwoEmail);
+		/*
+		 * TODO check win case to know what to send to other client (new value || win)
+		 */
+		if (playerTwo != null) {
+			communicationService.sendNewValue(senderEmail, playerTwo, value);
+		} else {
+			/* TODO return playerTwo withdraw return you won */
 		}
-		return status;
+		/* TODO if game ended I should remove game and update players */
+		updateGame(game, senderEmail, value);
 	}
 
-	private String extractSenderEmailFromSecurityContext() {
-		UserDetails user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		String senderEmail = user.getUsername();
-		return senderEmail;
-	}
-
-	private Player retrievePlayerIfRegisteredAndAvailable(String receiverEmail) throws BusinessException {
-		Player receiver = playerRepo.findPlayerInRegisteryByEmail(receiverEmail);
-		if (receiver == null) {
-			throw new UserDoesnotExistException();
-		} else if (!receiver.isAvailable()) {
-			throw new PlayerUnavailableException();
-		}
-		return receiver;
-	}
-
-	private GameInvitationStatusEnum sendGameInvitation(String senderEmail, Player receiver) {
-		return communicationService.sendGameInvitation(senderEmail, receiver);
-
-	}
-
-	private void startGame(String receiverEmail, String senderEmail, int initalValue) throws GameCreationException {
-		boolean gameStarted = createNewGame(receiverEmail, senderEmail, initalValue);
-		if (!gameStarted) {
-			throw new GameCreationException();
+	public void checkWinCase(int value) {
+		if (value == 1) {
+			// wincase
 		}
 	}
 
-	private boolean createNewGame(String receiverEmail, String senderEmail, int initalValue) {
-		Game game = new Game();
-		game.setCurrentValue(initalValue);
-		game.setPlayerOneEmail(senderEmail);
-		game.setPlayerTwoEmail(receiverEmail);
+	public void checkIfPlayerHasAnOngoingGame(Player player) throws BusinessException {
+		if (player.getCurrentGameId() == null || player.getCurrentGameId().equals("")) {
+			throw new NoGameExistsException();
+		}
+	}
+
+	public void checkIfItIsPlayerTurn(Game game, String senderEmail) throws BusinessException {
+		String lastPlayedBy = game.getLastPlayedBy();
+		if (senderEmail.equals(lastPlayedBy)) {
+			throw new NotUserTurnException();
+		}
+	}
+
+	public void applyRules(Game game, int newValue) throws BusinessException {
+		int previousValue = game.getCurrentValue();
+		if (previousValue - newValue > 1 || previousValue - newValue < -1 && newValue % 3 != 0) {
+			throw new RulesViolatedException();
+		}
+	}
+
+	public String getPlayerTwoEmail(String senderEmail, Game game) {
+		String playerTwo;
+		if (senderEmail.equals(game.getPlayerOneEmail())) {
+			playerTwo = game.getPlayerTwoEmail();
+		} else {
+			playerTwo = game.getPlayerOneEmail();
+		}
+		return playerTwo;
+	}
+
+	public void updateGame(Game game, String senderEmail, int newValue) {
 		game.setLastPlayedBy(senderEmail);
-		Player sender = playerRepo.findPlayerInRegisteryByEmail(senderEmail);
-		Player receiver = playerRepo.findPlayerInRegisteryByEmail(receiverEmail);
-		List<Player> updatedPlayers = updatePlayersWithGameIdAndAvailability(game, sender, receiver);
-		playerRepo.updatePlayersList(updatedPlayers);
-		return gameRepo.saveGame(game);
-	}
-
-	private List<Player> updatePlayersWithGameIdAndAvailability(Game game, Player sender, Player receiver) {
-		List<Player> updated = new ArrayList<>(2);
-		boolean currentPlayerAvailability = false;
-		sender.setCurrentGameId(game.getGameId());
-		sender.setAvailable(currentPlayerAvailability);
-		receiver.setCurrentGameId(game.getGameId());
-		receiver.setAvailable(currentPlayerAvailability);
-		updated.add(sender);
-		updated.add(receiver);
-		return updated;
+		game.setCurrentValue(newValue);
+		gameRepo.saveGame(game);
 	}
 }

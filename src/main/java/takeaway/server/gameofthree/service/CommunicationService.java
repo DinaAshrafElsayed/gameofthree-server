@@ -19,15 +19,16 @@ public class CommunicationService {
 	private RestTemplate restTemplate;
 
 	@Value("${client.acceptGameInvitationPathValue}")
-	private String pathSql;
+	private String acceptGameInvitationPathValue;
+	@Value("${client.playPathValue}")
+	private String playPathValue;
 
 	public GameInvitationStatusEnum sendGameInvitation(String senderUsername, Player reciever) {
 
-		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		String URI = builder.host(reciever.getIp()).port(reciever.getPort()).path(pathSql).toUriString();
+		String URI = buildURI(reciever, acceptGameInvitationPathValue);
 
 		try {
-			//FIXME return correct client response and make sure it's get method
+			// FIXME return correct client response and make sure it's get method
 			ResponseEntity<Boolean> response = restTemplate.getForEntity(URI, Boolean.class);
 			if (HttpStatus.OK.equals(response.getStatusCode()))
 				return response.getBody() ? GameInvitationStatusEnum.ACCEPTED : GameInvitationStatusEnum.DECLINED;
@@ -35,6 +36,27 @@ public class CommunicationService {
 			// TODO handle communicationExecption
 		}
 		return GameInvitationStatusEnum.DECLINED;
+	}
+
+	public boolean sendNewValue(String senderUsername, Player reciever, int value) {
+
+		String URI = buildURI(reciever, playPathValue);
+
+		try {
+			// FIXME return correct client response and check method
+			ResponseEntity<Boolean> response = restTemplate.postForEntity(URI, value,Boolean.class);
+			if (HttpStatus.OK.equals(response.getStatusCode()))
+				return true;
+		} catch (RestClientException e) {
+			// TODO handle communicationExecption
+		}
+		return false;
+	}
+
+	private String buildURI(Player reciever, String path) {
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
+		String URI = builder.host(reciever.getIp()).port(reciever.getPort()).path(path).toUriString();
+		return URI;
 	}
 
 }
