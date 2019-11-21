@@ -39,11 +39,12 @@ public class GameOfThreeService {
 	private CommunicationService communicationService;
 
 	public List<Player> getAvaliablePlayer() {
-		//FIXME remove sender email from list
+		/*FIXME remove sender email from list*/
 		return playerRepo.getAvaliablePlayers();
 	}
 
 	public GameInvitationStatusEnum startGame(String receiverEmail, int initalValue) throws BusinessException {
+		/*TODO make sure receiver and sender are not same person*/
 		String senderEmail = extractSenderEmailFromSecurityContext();
 		Player receiver = retrievePlayerIfRegisteredAndAvailable(receiverEmail);
 		GameInvitationStatusEnum status = sendGameInvitation(senderEmail, receiver);
