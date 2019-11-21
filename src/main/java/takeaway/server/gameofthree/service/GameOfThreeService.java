@@ -52,12 +52,12 @@ public class GameOfThreeService {
 		checkIfItIsPlayerTurn(game, senderEmail);
 		applyRules(game, value);
 		value /= 3;
-
+		boolean playerOneWon = value ==1? true: false;
+		/*
+		 * TODO handle win case else normal case
+		 */
 		String playerTwoEmail = getPlayerTwoEmail(senderEmail, game);
 		Player playerTwo = playerRepo.findPlayerInRegisteryByEmail(playerTwoEmail);
-		/*
-		 * TODO check win case to know what to send to other client (new value || win)
-		 */
 		if (playerTwo != null) {
 			communicationService.sendNewValue(senderEmail, playerTwo, value);
 		} else {
@@ -67,11 +67,7 @@ public class GameOfThreeService {
 		updateGame(game, senderEmail, value);
 	}
 
-	public void checkWinCase(int value) {
-		if (value == 1) {
-			// wincase
-		}
-	}
+	
 
 	public void checkIfPlayerHasAnOngoingGame(Player player) throws BusinessException {
 		if (player.getCurrentGameId() == null || player.getCurrentGameId().equals("")) {

@@ -28,18 +28,18 @@ import takeaway.server.gameofthree.service.GameInvitationService;
 public class GameController {
 
 	@Autowired
-	private GameInvitationService gameOfThreeService;
+	private GameInvitationService gameInvitationService;
 
 	@PostMapping(value = "/takeaway/v1/invite/{email}/play", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> startGame(@PathVariable(name = "email") @NotBlank String email,
 			@RequestParam(name = "initalValue", required = true) int initalValue )  throws BusinessException {
-		GameInvitationStatusEnum status = gameOfThreeService.startGame(email, initalValue);
+		GameInvitationStatusEnum status = gameInvitationService.startGame(email, initalValue);
 		return ResponseEntity.ok(new StartGameResponse(status.name()));
 	}
 
 	@GetMapping(value = "/takeaway/v1/availablePlayers")
 	public ResponseEntity<?> getAvailablePlayers() {
-		return ResponseEntity.ok(gameOfThreeService.getAvaliablePlayer());
+		return ResponseEntity.ok(gameInvitationService.getAvaliablePlayer());
 	}
 
 	@PatchMapping(value = "/takeaway/v1/play", consumes = MediaType.APPLICATION_JSON_VALUE)
