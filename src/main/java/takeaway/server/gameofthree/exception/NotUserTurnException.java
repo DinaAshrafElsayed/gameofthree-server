@@ -4,9 +4,6 @@ import org.springframework.http.HttpStatus;
 
 public class NotUserTurnException extends BusinessException {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -794983855223820290L;
 
 	public NotUserTurnException() {

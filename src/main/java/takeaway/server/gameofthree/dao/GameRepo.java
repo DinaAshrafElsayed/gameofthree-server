@@ -1,7 +1,6 @@
 package takeaway.server.gameofthree.dao;
 
 import takeaway.server.gameofthree.dto.Game;
-import takeaway.server.gameofthree.dto.Player;
 
 public interface GameRepo {
 
