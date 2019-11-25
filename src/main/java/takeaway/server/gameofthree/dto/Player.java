@@ -10,6 +10,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import lombok.Data;
 
 /**
+ * Represents a player in the game
  * 
  * @author El-sayedD
  *
@@ -18,11 +19,11 @@ import lombok.Data;
 public class Player implements Serializable {
 
 	private static final long serialVersionUID = -7199112174977103043L;
-	
+
 	@NotBlank
 	@Email
 	private String email;
-	@Pattern(regexp ="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
+	@Pattern(regexp = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
 	@NotBlank
 	private String ip;
 	@NotBlank

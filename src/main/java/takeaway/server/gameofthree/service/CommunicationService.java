@@ -12,6 +12,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 import takeaway.server.gameofthree.dto.GameInvitationStatusEnum;
 import takeaway.server.gameofthree.dto.Player;
 
+/**
+ * The service responsible for communication between players (through the
+ * server)
+ * 
+ * @author El-sayedD
+ */
 @Service
 public class CommunicationService {
 
@@ -23,6 +29,14 @@ public class CommunicationService {
 	@Value("${client.playPathValue}")
 	private String playPathValue;
 
+	/**
+	 * Used by the inviting player to send an invitation request to start a new game
+	 * with the receiver player
+	 * 
+	 * @param senderUsername the username of the inviting player
+	 * @param reciever       the player to be invited
+	 * @return response to the invitation either ACCEPTED or DECLINED
+	 */
 	public GameInvitationStatusEnum sendGameInvitation(String senderUsername, Player reciever) {
 
 		String URI = buildURI(reciever, acceptGameInvitationPathValue);
@@ -38,13 +52,21 @@ public class CommunicationService {
 		return GameInvitationStatusEnum.DECLINED;
 	}
 
+	/**
+	 * Used by a player to send a new value (play their turn) during the game
+	 * 
+	 * @param senderUsername username of the player sending the new value
+	 * @param reciever       receiver player of the new value
+	 * @param value          the value to be sent
+	 * @return true if value reached the other player, false otherwise
+	 */
 	public boolean sendNewValue(String senderUsername, Player reciever, int value) {
 
 		String URI = buildURI(reciever, playPathValue);
 
 		try {
 			// FIXME return correct client response and check method
-			ResponseEntity<Boolean> response = restTemplate.postForEntity(URI, value,Boolean.class);
+			ResponseEntity<Boolean> response = restTemplate.postForEntity(URI, value, Boolean.class);
 			if (HttpStatus.OK.equals(response.getStatusCode()))
 				return true;
 		} catch (RestClientException e) {

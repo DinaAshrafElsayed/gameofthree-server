@@ -10,25 +10,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
- * Error
+ * Represents a server error that's sent to the client
+ * 
+ * @author El-sayedD
  */
 @Validated
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
-public class Error  implements Serializable {
-  private static final long serialVersionUID = 1L;
+public class Error implements Serializable {
+	private static final long serialVersionUID = 1L;
 
-  @JsonProperty("code")
-  private Integer code = null;
+	@JsonProperty("code")
+	private Integer code = null;
 
+	@JsonProperty("message")
+	private String message = null;
 
-  @JsonProperty("message")
-  private String message = null;
-
-  @JsonProperty("status")
-  private Integer status = null;
-
+	@JsonProperty("status")
+	private Integer status = null;
 
 }
-

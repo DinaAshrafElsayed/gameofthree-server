@@ -14,7 +14,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import takeaway.server.gameofthree.dto.Error;
+
 /**
+ * General exception handler for any thrown non caught exception
  * 
  * @author El-sayedD
  *

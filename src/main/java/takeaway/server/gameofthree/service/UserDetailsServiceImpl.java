@@ -11,11 +11,21 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author El-sayedD
+ */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
 	public final String ROLE = "PLAYER";
 
+	/**
+	 * retrieves user data using his email
+	 * 
+	 * @param email user email
+	 * @return user data
+	 * @throws UsernameNotFoundException if username (email) isn't registered
+	 */
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		String randomPassword = generateRandomPassword();
@@ -25,6 +35,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		return builder.build();
 	}
 
+	/**
+	 * helper method to generate a random password of 7 characters
+	 * 
+	 * @return generated password
+	 */
 	private String generateRandomPassword() {
 		byte[] array = new byte[7]; // length is bounded by 7
 		new Random().nextBytes(array);

@@ -35,6 +35,12 @@ public class RegistrationService {
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
 
+	/**
+	 * Used to register a player in the server
+	 * 
+	 * @return token with user data
+	 * @throws BusinessException if user is already registered
+	 */
 	public String register(Player player) throws BusinessException {
 		String token = null;
 		if (playerRepo.findPlayerInRegisteryByEmail(player.getEmail()) == null) {
@@ -48,6 +54,11 @@ public class RegistrationService {
 		return token;
 	}
 
+	/**
+	 * Unregister the player from the server
+	 * 
+	 * @throws BusinessException if token is invalid
+	 */
 	public void unregister() throws BusinessException {
 		UserDetails user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String email = user.getUsername();

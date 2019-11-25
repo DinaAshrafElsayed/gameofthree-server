@@ -11,6 +11,12 @@ import org.springframework.stereotype.Repository;
 
 import takeaway.server.gameofthree.dto.Player;
 
+/**
+ * Actual implementation of the player repository using Concurrent Maps to be
+ * thread safe
+ * 
+ * @author El-sayedD
+ */
 @Repository("PlayerRepoDefaultImpl")
 public class PlayerRepoDefaultImpl implements PlayerRepo {
 
