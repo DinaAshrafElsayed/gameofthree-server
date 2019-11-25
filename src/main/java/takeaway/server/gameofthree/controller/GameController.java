@@ -9,12 +9,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import takeaway.server.gameofthree.dto.GameInvitationResponse;
 import takeaway.server.gameofthree.dto.GameInvitationStatusEnum;
-import takeaway.server.gameofthree.dto.StartGameResponse;
 import takeaway.server.gameofthree.exception.BusinessException;
 import takeaway.server.gameofthree.service.AvailablePlayersService;
 import takeaway.server.gameofthree.service.GameInvitationService;
@@ -42,10 +41,10 @@ public class GameController {
 	 * @throws BusinessException thrown when the other player is not available to
 	 *                           start a new game
 	 */
-	@PostMapping(value = "/takeaway/v1/invite/{email}/play", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/takeaway/v1/invite/{email}/play", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> startGame(@PathVariable(name = "email") @NotBlank String email) throws BusinessException {
 		GameInvitationStatusEnum status = gameInvitationService.startGame(email);
-		return ResponseEntity.ok(new StartGameResponse(status.name()));
+		return ResponseEntity.ok(new GameInvitationResponse(status.name()));
 	}
 
 	/**

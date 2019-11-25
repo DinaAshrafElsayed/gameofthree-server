@@ -1,5 +1,6 @@
 package takeaway.server.gameofthree.exception;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -11,8 +12,10 @@ import org.springframework.http.HttpStatus;
  */
 public class UserDoesnotExistException extends BusinessException {
 	private static final long serialVersionUID = -687991492884005033L;
+	@Value("${userDoesntExistMessage}")
+	private static String message;
 
 	public UserDoesnotExistException() {
-		super("user doesn't exist", HttpStatus.BAD_REQUEST);
+		super(message, HttpStatus.BAD_REQUEST);
 	}
 }

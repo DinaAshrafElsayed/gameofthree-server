@@ -1,5 +1,6 @@
 package takeaway.server.gameofthree.exception;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -9,8 +10,10 @@ import org.springframework.http.HttpStatus;
  */
 public class GameCreationException extends BusinessException {
 	private static final long serialVersionUID = 1L;
+	@Value("${GameCreationExceptionMessage}")
+	private static String message;
 
 	public GameCreationException() {
-		super("failed to start game please try again later", HttpStatus.INTERNAL_SERVER_ERROR);
+		super(message, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

@@ -1,5 +1,6 @@
 package takeaway.server.gameofthree.exception;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -12,7 +13,10 @@ public class UserAlreadyRegisteredException extends BusinessException {
 
 	private static final long serialVersionUID = 1L;
 
+	@Value("${userAlreadyRegisteredMessage}")
+	private static String message;
+	
 	public UserAlreadyRegisteredException() {
-		super("user already registered", HttpStatus.BAD_REQUEST);
+		super(message, HttpStatus.BAD_REQUEST);
 	}
 }

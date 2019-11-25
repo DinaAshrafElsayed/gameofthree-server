@@ -9,6 +9,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import lombok.extern.slf4j.Slf4j;
+import takeaway.server.gameofthree.dto.GameInvitationResponse;
 import takeaway.server.gameofthree.dto.GameInvitationStatusEnum;
 import takeaway.server.gameofthree.dto.Player;
 
@@ -18,6 +20,7 @@ import takeaway.server.gameofthree.dto.Player;
  * 
  * @author El-sayedD
  */
+@Slf4j
 @Service
 public class CommunicationService {
 
@@ -28,6 +31,9 @@ public class CommunicationService {
 	private String acceptGameInvitationPathValue;
 	@Value("${client.playPathValue}")
 	private String playPathValue;
+	@Value("${client.accept.invite.emailQueryParam}")
+	private String email;
+	private final String HTTP = "http";
 
 	/**
 	 * Used by the inviting player to send an invitation request to start a new game
@@ -42,12 +48,17 @@ public class CommunicationService {
 		String URI = buildURI(reciever, acceptGameInvitationPathValue);
 
 		try {
-			// FIXME return correct client response and make sure it's get method
-			ResponseEntity<Boolean> response = restTemplate.getForEntity(URI, Boolean.class);
+			URI = addQueryParam(URI, email, reciever.getEmail());
+			ResponseEntity<GameInvitationResponse> response = restTemplate.getForEntity(URI,
+					GameInvitationResponse.class);
+			//TODO fix me to return GameInvitationResponse
 			if (HttpStatus.OK.equals(response.getStatusCode()))
-				return response.getBody() ? GameInvitationStatusEnum.ACCEPTED : GameInvitationStatusEnum.DECLINED;
+				return GameInvitationStatusEnum.ACCEPTED.name().equals(response.getBody().getAcceptInvitationResponse())
+						? GameInvitationStatusEnum.ACCEPTED
+						: GameInvitationStatusEnum.DECLINED;
 		} catch (RestClientException e) {
 			// TODO handle communicationExecption
+			log.error(e.getMessage());
 		}
 		return GameInvitationStatusEnum.DECLINED;
 	}
@@ -77,8 +88,13 @@ public class CommunicationService {
 
 	private String buildURI(Player reciever, String path) {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		String URI = builder.host(reciever.getIp()).port(reciever.getPort()).path(path).toUriString();
+		String URI = builder.scheme(HTTP).host(reciever.getIp()).port(reciever.getPort()).path(path).toUriString();
 		return URI;
 	}
 
+	private String addQueryParam(String uri, String QueryParamName, String QueryParamValue) {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(uri);
+		String URI = builder.queryParam(QueryParamName, QueryParamValue).toUriString();
+		return URI;
+	}
 }

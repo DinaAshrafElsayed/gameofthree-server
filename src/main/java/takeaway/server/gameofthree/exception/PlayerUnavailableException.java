@@ -1,5 +1,6 @@
 package takeaway.server.gameofthree.exception;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -11,8 +12,11 @@ import org.springframework.http.HttpStatus;
  */
 public class PlayerUnavailableException extends BusinessException {
 	private static final long serialVersionUID = 1L;
+	
+	@Value("${PlayerUnavailableExceptionMessage}")
+	private static String message;
 
 	public PlayerUnavailableException() {
-		super("player is in another game", HttpStatus.CONFLICT);
+		super(message, HttpStatus.CONFLICT);
 	}
 }
