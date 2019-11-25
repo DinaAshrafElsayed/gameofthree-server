@@ -54,21 +54,24 @@ public class GameOfThreeService {
 	 */
 	public void play(int value) throws BusinessException {
 		String senderEmail = gameOfThreeUtil.extractSenderEmailFromSecurityContext();
-		Player sender = gameOfThreeUtil.retrievePlayerIfRegisteredAndAvailable(senderEmail);
+		Player sender = playerRepo.findPlayerInRegisteryByEmail(senderEmail);
 		checkIfPlayerHasAnOngoingGame(sender);
 		Game game = gameRepo.findGameById(sender.getCurrentGameId());
-		//TODO handle first case 
-		checkIfItIsPlayerTurn(game, senderEmail);
-		applyRules(game, value);
-		value /= 3;
+		/* not first play */
+		if(game.getLastPlayedBy() != null && !game.getLastPlayedBy().equals("")) {
+			checkIfItIsPlayerTurn(game, senderEmail);
+			applyRules(game, value);
+			value /= 3;
+		}
 		boolean playerOneWon = value == 1 ? true : false;
+		
 		/*
 		 * TODO handle win case else normal case
 		 */
 		String playerTwoEmail = getPlayerTwoEmail(senderEmail, game);
 		Player playerTwo = playerRepo.findPlayerInRegisteryByEmail(playerTwoEmail);
 		if (playerTwo != null) {
-			communicationService.sendNewValue(senderEmail, playerTwo, value);
+			communicationService.sendNewValue(playerTwo, value);
 		} else {
 			/* TODO return playerTwo withdraw return you won */
 		}
@@ -82,7 +85,7 @@ public class GameOfThreeService {
 	 * @param player the player to be checked
 	 * @throws BusinessException if the player is in a running game
 	 */
-	public void checkIfPlayerHasAnOngoingGame(Player player) throws BusinessException {
+	private void checkIfPlayerHasAnOngoingGame(Player player) throws BusinessException {
 		if (player.getCurrentGameId() == null || player.getCurrentGameId().equals("")) {
 			throw new NoGameExistsException();
 		}
@@ -95,7 +98,7 @@ public class GameOfThreeService {
 	 * @param senderEmail email of the player to be checked
 	 * @throws BusinessException if it's not user's turn
 	 */
-	public void checkIfItIsPlayerTurn(Game game, String senderEmail) throws BusinessException {
+	private void checkIfItIsPlayerTurn(Game game, String senderEmail) throws BusinessException {
 		String lastPlayedBy = game.getLastPlayedBy();
 		if (senderEmail.equals(lastPlayedBy)) {
 			throw new NotUserTurnException();
@@ -111,7 +114,7 @@ public class GameOfThreeService {
 	 * @throws BusinessException if the newValue doesn't follow the rules of the
 	 *                           game
 	 */
-	public void applyRules(Game game, int newValue) throws BusinessException {
+	private void applyRules(Game game, int newValue) throws BusinessException {
 		int previousValue = game.getCurrentValue();
 		if (previousValue - newValue > 1 || previousValue - newValue < -1 && newValue % 3 != 0) {
 			throw new RulesViolatedException();
@@ -125,7 +128,7 @@ public class GameOfThreeService {
 	 * @param game        running game
 	 * @return email of the other player
 	 */
-	public String getPlayerTwoEmail(String senderEmail, Game game) {
+	private String getPlayerTwoEmail(String senderEmail, Game game) {
 		String playerTwo;
 		if (senderEmail.equals(game.getPlayerOneEmail())) {
 			playerTwo = game.getPlayerTwoEmail();
@@ -142,7 +145,7 @@ public class GameOfThreeService {
 	 * @param senderEmail last player
 	 * @param newValue    the newValue
 	 */
-	public void updateGame(Game game, String senderEmail, int newValue) {
+	private void updateGame(Game game, String senderEmail, int newValue) {
 		game.setLastPlayedBy(senderEmail);
 		game.setCurrentValue(newValue);
 		gameRepo.saveGame(game);

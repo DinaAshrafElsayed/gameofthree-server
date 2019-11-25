@@ -51,7 +51,7 @@ public class CommunicationService {
 			URI = addQueryParam(URI, email, reciever.getEmail());
 			ResponseEntity<GameInvitationResponse> response = restTemplate.getForEntity(URI,
 					GameInvitationResponse.class);
-			//TODO fix me to return GameInvitationResponse
+			// TODO fix me to return GameInvitationResponse
 			if (HttpStatus.OK.equals(response.getStatusCode()))
 				return GameInvitationStatusEnum.ACCEPTED.name().equals(response.getBody().getAcceptInvitationResponse())
 						? GameInvitationStatusEnum.ACCEPTED
@@ -66,24 +66,20 @@ public class CommunicationService {
 	/**
 	 * Used by a player to send a new value (play their turn) during the game
 	 * 
-	 * @param senderUsername username of the player sending the new value
-	 * @param reciever       receiver player of the new value
-	 * @param value          the value to be sent
+	 * @param reciever receiver player of the new value
+	 * @param value    the value to be sent
 	 * @return true if value reached the other player, false otherwise
 	 */
-	public boolean sendNewValue(String senderUsername, Player reciever, int value) {
-
+	public void sendNewValue(Player reciever, int value) {
 		String URI = buildURI(reciever, playPathValue);
-
 		try {
-			// FIXME return correct client response and check method
-			ResponseEntity<Boolean> response = restTemplate.postForEntity(URI, value, Boolean.class);
-			if (HttpStatus.OK.equals(response.getStatusCode()))
-				return true;
+			URI = addQueryParam(URI, "value", String.valueOf(value));
+			restTemplate.getForEntity(URI, ResponseEntity.class);
 		} catch (RestClientException e) {
 			// TODO handle communicationExecption
+			log.error(e.getMessage());
 		}
-		return false;
+
 	}
 
 	private String buildURI(Player reciever, String path) {
