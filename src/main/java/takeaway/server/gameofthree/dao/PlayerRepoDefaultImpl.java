@@ -1,13 +1,14 @@
 package takeaway.server.gameofthree.dao;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
 
 import takeaway.server.gameofthree.dto.Player;
@@ -19,15 +20,14 @@ import takeaway.server.gameofthree.dto.Player;
  * @author El-sayedD
  */
 @Repository("PlayerRepoDefaultImpl")
+@Scope("singleton")
 public class PlayerRepoDefaultImpl implements PlayerRepo {
 
-	private Map<String, Player> registeredPlayersMap;
-	private Map<String, Player> availablePlayersMap;
+	private static Map<String, Player> registeredPlayersMap;
 
 	@PostConstruct
 	void init() {
 		registeredPlayersMap = new ConcurrentHashMap<>();
-		availablePlayersMap = new ConcurrentHashMap<>();
 	}
 
 	@Override
@@ -42,7 +42,8 @@ public class PlayerRepoDefaultImpl implements PlayerRepo {
 
 	@Override
 	public boolean isPlayerAvaliable(String playerEmail) {
-		return availablePlayersMap.containsKey(playerEmail);
+		Player player = registeredPlayersMap.get(playerEmail);
+		return player.isAvailable();
 	}
 
 	@Override
@@ -52,19 +53,24 @@ public class PlayerRepoDefaultImpl implements PlayerRepo {
 
 	@Override
 	public Set<String> getAvailablePlayersEmailNotEqualEmail(String playerEmail) {
-		Set<String> availablePlalyers = availablePlayersMap.keySet();
-		availablePlalyers.remove(playerEmail);
+		Set<String> availablePlalyers = registeredPlayersMap.values().stream()
+				.filter(p -> p.isAvailable() && !p.getEmail().equals(playerEmail)).map(Player::getEmail)
+				.collect(Collectors.toSet());
 		return availablePlalyers;
 	}
 
 	@Override
 	public Player markPlayerAsAvailable(Player player) {
-		return availablePlayersMap.put(player.getEmail(), player);
+		player.setAvailable(true);
+		registeredPlayersMap.put(player.getEmail(), player);
+		return registeredPlayersMap.get(player.getEmail());
 	}
 
 	@Override
 	public Player markPlayerAsUnavailable(Player player) {
-		return availablePlayersMap.remove(player.getEmail());
+		player.setAvailable(false);
+		registeredPlayersMap.put(player.getEmail(), player);
+		return registeredPlayersMap.get(player.getEmail());
 	}
 
 	@Override
@@ -81,12 +87,8 @@ public class PlayerRepoDefaultImpl implements PlayerRepo {
 	public boolean updatePlayerGameIdAndAvailability(String playerEmail, String gameId, boolean isAvailable) {
 		if (registeredPlayersMap.containsKey(playerEmail)) {
 			Player player = registeredPlayersMap.get(playerEmail);
+			player.setAvailable(isAvailable);
 			player.setCurrentGameId(gameId);
-			if (isAvailable) {
-				availablePlayersMap.put(playerEmail, player);
-			} else {
-				availablePlayersMap.remove(playerEmail);
-			}
 			return registeredPlayersMap.put(playerEmail, player) != null ? true : false;
 		}
 		return false;
@@ -95,11 +97,6 @@ public class PlayerRepoDefaultImpl implements PlayerRepo {
 	@Override
 	public void updatePlayersList(List<Player> players) {
 		for (Player player : players) {
-			if (player.isAvailable()) {
-				availablePlayersMap.put(player.getEmail(), player);
-			} else {
-				availablePlayersMap.remove(player.getEmail());
-			}
 			registeredPlayersMap.put(player.getEmail(), player);
 		}
 	}

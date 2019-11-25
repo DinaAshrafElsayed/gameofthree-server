@@ -47,7 +47,6 @@ public class RegistrationService {
 			token = jwtTokenUtil.generateToken(player);
 			player.setAvailable(true);
 			playerRepo.addPlayerToRegistery(player);
-			playerRepo.markPlayerAsAvailable(player);
 		} else {
 			throw new UserAlreadyRegisteredException();
 		}
