@@ -2,6 +2,7 @@ package takeaway.server.gameofthree.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,16 +41,6 @@ public class GameInvitationService {
 	@Autowired
 	private GameOfThreeUtil gameOfThreeUtil;
 
-	/**
-	 * Retrieves list of players that are available to start a new game (not busy
-	 * with any current game)
-	 * 
-	 * @return list of available players
-	 */
-	public List<Player> getAvaliablePlayer() {
-		/* FIXME remove sender email from list */
-		return playerRepo.getAvaliablePlayers();
-	}
 
 	/**
 	 * Used by a player to start a new game with another player
@@ -61,13 +52,13 @@ public class GameInvitationService {
 	 *                           doesn't exist or PlayerUnavailableException if
 	 *                           player is not available for a new game
 	 */
-	public GameInvitationStatusEnum startGame(String receiverEmail, int initalValue) throws BusinessException {
+	public GameInvitationStatusEnum startGame(String receiverEmail) throws BusinessException {
 		/* TODO make sure receiver and sender are not same person */
 		String senderEmail = gameOfThreeUtil.extractSenderEmailFromSecurityContext();
 		Player receiver = gameOfThreeUtil.retrievePlayerIfRegisteredAndAvailable(receiverEmail);
 		GameInvitationStatusEnum status = sendGameInvitation(senderEmail, receiver);
 		if (GameInvitationStatusEnum.ACCEPTED.equals(status)) {
-			startGame(receiverEmail, senderEmail, initalValue);
+			startGame(receiverEmail, senderEmail);
 		}
 		return status;
 	}
@@ -92,8 +83,8 @@ public class GameInvitationService {
 	 * @param initalValue   initial value of the game
 	 * @throws GameCreationException if anything goes wrong with Game Creation
 	 */
-	private void startGame(String receiverEmail, String senderEmail, int initalValue) throws GameCreationException {
-		boolean gameStarted = createNewGame(receiverEmail, senderEmail, initalValue);
+	private void startGame(String receiverEmail, String senderEmail) throws GameCreationException {
+		boolean gameStarted = createNewGame(receiverEmail, senderEmail);
 		if (!gameStarted) {
 			throw new GameCreationException();
 		}
@@ -107,12 +98,10 @@ public class GameInvitationService {
 	 * @param initalValue   the initial value of the game
 	 * @return true if game is created, false otherwise
 	 */
-	private boolean createNewGame(String receiverEmail, String senderEmail, int initalValue) {
+	private boolean createNewGame(String receiverEmail, String senderEmail) {
 		Game game = new Game();
-		game.setCurrentValue(initalValue);
 		game.setPlayerOneEmail(senderEmail);
 		game.setPlayerTwoEmail(receiverEmail);
-		game.setLastPlayedBy(senderEmail);
 		Player sender = playerRepo.findPlayerInRegisteryByEmail(senderEmail);
 		Player receiver = playerRepo.findPlayerInRegisteryByEmail(receiverEmail);
 		List<Player> updatedPlayers = updatePlayersWithGameIdAndAvailability(game, sender, receiver);

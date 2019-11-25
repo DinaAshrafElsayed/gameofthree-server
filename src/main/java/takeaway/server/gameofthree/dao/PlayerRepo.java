@@ -1,6 +1,7 @@
 package takeaway.server.gameofthree.dao;
 
 import java.util.List;
+import java.util.Set;
 
 import takeaway.server.gameofthree.dto.Player;
 
@@ -23,7 +24,7 @@ public interface PlayerRepo {
 
 	boolean isPlayerAvaliable(String playerEmail);
 
-	List<Player> getAvaliablePlayers();
+	Set<String> getAvailablePlayersEmailNotEqualEmail(String playerEmail);
 
 	boolean updatePlayerByGameId(String playerEmail, String gameId);
 

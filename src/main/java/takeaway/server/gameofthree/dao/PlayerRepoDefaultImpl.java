@@ -3,6 +3,7 @@ package takeaway.server.gameofthree.dao;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
@@ -50,8 +51,10 @@ public class PlayerRepoDefaultImpl implements PlayerRepo {
 	}
 
 	@Override
-	public List<Player> getAvaliablePlayers() {
-		return new ArrayList<>(availablePlayersMap.values());
+	public Set<String> getAvailablePlayersEmailNotEqualEmail(String playerEmail) {
+		Set<String> availablePlalyers = availablePlayersMap.keySet();
+		availablePlalyers.remove(playerEmail);
+		return availablePlalyers;
 	}
 
 	@Override

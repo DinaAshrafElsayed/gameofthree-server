@@ -57,6 +57,7 @@ public class GameOfThreeService {
 		Player sender = gameOfThreeUtil.retrievePlayerIfRegisteredAndAvailable(senderEmail);
 		checkIfPlayerHasAnOngoingGame(sender);
 		Game game = gameRepo.findGameById(sender.getCurrentGameId());
+		//TODO handle first case 
 		checkIfItIsPlayerTurn(game, senderEmail);
 		applyRules(game, value);
 		value /= 3;
