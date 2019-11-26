@@ -32,4 +32,6 @@ public class Player implements Serializable {
 
 	private String currentGameId;
 	private boolean isAvailable;
+	/*it could be manual or automatic*/
+	private String inputChoice;
 }

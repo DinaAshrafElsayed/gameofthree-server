@@ -12,6 +12,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import lombok.extern.slf4j.Slf4j;
 import takeaway.server.gameofthree.dto.GameInvitationResponse;
 import takeaway.server.gameofthree.dto.GameInvitationStatusEnum;
+import takeaway.server.gameofthree.dto.PlayRequestAndResponse;
 import takeaway.server.gameofthree.dto.Player;
 
 /**
@@ -70,16 +71,19 @@ public class CommunicationService {
 	 * @param value    the value to be sent
 	 * @return true if value reached the other player, false otherwise
 	 */
-	public void sendNewValue(Player reciever, int value) {
+	public PlayRequestAndResponse sendValueAndRecieveNewValue(Player reciever, int value, boolean firstRound, String inputChoice) {
 		String URI = buildURI(reciever, playPathValue);
+		ResponseEntity<PlayRequestAndResponse> response = null;
 		try {
 			URI = addQueryParam(URI, "value", String.valueOf(value));
-			restTemplate.getForEntity(URI, ResponseEntity.class);
+			URI = addQueryParam(URI, "firstRound", String.valueOf(firstRound));
+			URI = addQueryParam(URI, "inputChoice", inputChoice);
+			response = restTemplate.getForEntity(URI, PlayRequestAndResponse.class);
 		} catch (RestClientException e) {
 			// TODO handle communicationExecption
 			log.error(e.getMessage());
 		}
-
+		return response.getBody();
 	}
 
 	private String buildURI(Player reciever, String path) {

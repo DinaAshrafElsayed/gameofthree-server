@@ -1,5 +1,8 @@
 package takeaway.server.gameofthree.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Service;
 import takeaway.server.gameofthree.dao.GameRepo;
 import takeaway.server.gameofthree.dao.PlayerRepo;
 import takeaway.server.gameofthree.dto.Game;
+import takeaway.server.gameofthree.dto.PlayRequestAndResponse;
 import takeaway.server.gameofthree.dto.Player;
 import takeaway.server.gameofthree.exception.BusinessException;
 import takeaway.server.gameofthree.exception.NoGameExistsException;
@@ -52,31 +56,57 @@ public class GameOfThreeService {
 	 *                                  (matches rule (-1,0,1)) and divisible by 3
 	 * 
 	 */
-	public void play(int value) throws BusinessException {
+	public PlayRequestAndResponse play(int value) throws BusinessException {
 		String senderEmail = gameOfThreeUtil.extractSenderEmailFromSecurityContext();
 		Player sender = playerRepo.findPlayerInRegisteryByEmail(senderEmail);
 		checkIfPlayerHasAnOngoingGame(sender);
 		Game game = gameRepo.findGameById(sender.getCurrentGameId());
 		/* not first play */
-		if(game.getLastPlayedBy() != null && !game.getLastPlayedBy().equals("")) {
+		boolean firstRound = false;
+		if (game.getLastPlayedBy() != null && !game.getLastPlayedBy().equals("")) {
 			checkIfItIsPlayerTurn(game, senderEmail);
 			applyRules(game, value);
 			value /= 3;
+		}else {
+			firstRound = true;
 		}
 		boolean playerOneWon = value == 1 ? true : false;
-		
-		/*
-		 * TODO handle win case else normal case
-		 */
+		/* TODO handle win player 1 win*/
 		String playerTwoEmail = getPlayerTwoEmail(senderEmail, game);
 		Player playerTwo = playerRepo.findPlayerInRegisteryByEmail(playerTwoEmail);
+		updateGame(game, senderEmail, value);
+		PlayRequestAndResponse response = new PlayRequestAndResponse();
 		if (playerTwo != null) {
-			communicationService.sendNewValue(playerTwo, value);
+			response = communicationService.sendValueAndRecieveNewValue(playerTwo, value,firstRound, playerTwo.getInputChoice());
+			int newValue = extractDataFromResponse(game, firstRound, playerTwo, response);
+			newValue /= 3;
+			/* TODO handle win player 2 won */
+			updateGame(game, playerTwoEmail, newValue);
+			response.setValue(newValue);
 		} else {
 			/* TODO return playerTwo withdraw return you won */
 		}
 		/* TODO if game ended I should remove game and update players */
-		updateGame(game, senderEmail, value);
+		return response;
+
+	}
+
+	private int extractDataFromResponse(Game game, boolean firstRound, Player playerTwo,
+			PlayRequestAndResponse response) throws BusinessException {
+		int newValue = response.getValue();
+		applyRules(game, newValue);
+		updatePlayerTwoWithHisInputChoice(firstRound, playerTwo, response);
+		return newValue;
+	}
+
+	private void updatePlayerTwoWithHisInputChoice(boolean firstRound, Player playerTwo,
+			PlayRequestAndResponse response) {
+		if(firstRound) {
+		playerTwo.setInputChoice(response.getInputChoice());
+		List<Player> players = new ArrayList<>(1);
+		players.add(playerTwo);
+		playerRepo.updatePlayersList(players);
+		}
 	}
 
 	/**

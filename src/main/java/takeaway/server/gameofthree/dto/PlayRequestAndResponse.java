@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import lombok.Data;
 
-
 /**
  * Represents a value in the game
  * 
@@ -12,14 +11,17 @@ import lombok.Data;
  *
  */
 @Data
-public class PlayRequest implements Serializable{
-	
+public class PlayRequestAndResponse implements Serializable {
+
 	private static final long serialVersionUID = 6860603557450916164L;
 	private int value;
-	public PlayRequest() {
-		
+	private String inputChoice;
+
+	public PlayRequestAndResponse() {
+
 	}
-	public PlayRequest(int value) {
+
+	public PlayRequestAndResponse(int value) {
 		super();
 		this.value = value;
 	}

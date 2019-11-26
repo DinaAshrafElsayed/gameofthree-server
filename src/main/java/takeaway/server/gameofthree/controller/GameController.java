@@ -2,19 +2,18 @@ package takeaway.server.gameofthree.controller;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import takeaway.server.gameofthree.dto.GameInvitationResponse;
 import takeaway.server.gameofthree.dto.GameInvitationStatusEnum;
-import takeaway.server.gameofthree.dto.PlayRequest;
+import takeaway.server.gameofthree.dto.PlayRequestAndResponse;
 import takeaway.server.gameofthree.exception.BusinessException;
 import takeaway.server.gameofthree.service.AvailablePlayersService;
 import takeaway.server.gameofthree.service.GameInvitationService;
@@ -31,10 +30,10 @@ public class GameController {
 
 	@Autowired
 	private GameInvitationService gameInvitationService;
-	
+
 	@Autowired
 	private GameOfThreeService gameOfThreeService;
-	
+
 	@Autowired
 	private AvailablePlayersService availablePlayersService;
 
@@ -65,13 +64,12 @@ public class GameController {
 	 * player's turn)
 	 * 
 	 * @param playRequest the request contains the new value to be played
-	 * @throws BusinessException 
+	 * @throws BusinessException
 	 */
-	@PutMapping(value = "/takeaway/v1/play", consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> play(@RequestBody PlayRequest playRequest) throws BusinessException {
-		//TODO respond async
-		gameOfThreeService.play(playRequest.getValue());
-		return new ResponseEntity<>(HttpStatus.OK);
+	@PostMapping(value = "/takeaway/v1/play", consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> play(@RequestBody PlayRequestAndResponse playRequest) throws BusinessException {
+		PlayRequestAndResponse response = gameOfThreeService.play(playRequest.getValue());
+		return ResponseEntity.ok(response);
 	}
 
 }
