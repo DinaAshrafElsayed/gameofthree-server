@@ -12,6 +12,7 @@ import takeaway.server.gameofthree.dao.PlayerRepo;
 import takeaway.server.gameofthree.dto.Game;
 import takeaway.server.gameofthree.dto.PlayRequestAndResponse;
 import takeaway.server.gameofthree.dto.Player;
+import takeaway.server.gameofthree.dto.PlayerStatusEnum;
 import takeaway.server.gameofthree.exception.BusinessException;
 import takeaway.server.gameofthree.exception.NoGameExistsException;
 import takeaway.server.gameofthree.exception.NotUserTurnException;
@@ -61,34 +62,44 @@ public class GameOfThreeService {
 		Player sender = playerRepo.findPlayerInRegisteryByEmail(senderEmail);
 		checkIfPlayerHasAnOngoingGame(sender);
 		Game game = gameRepo.findGameById(sender.getCurrentGameId());
-		/* not first play */
 		boolean firstRound = false;
 		if (game.getLastPlayedBy() != null && !game.getLastPlayedBy().equals("")) {
 			checkIfItIsPlayerTurn(game, senderEmail);
 			applyRules(game, value);
 			value /= 3;
-		}else {
+		} else {
 			firstRound = true;
 		}
+		boolean playerTwoWon = false;
 		boolean playerOneWon = value == 1 ? true : false;
-		/* TODO handle win player 1 win*/
 		String playerTwoEmail = getPlayerTwoEmail(senderEmail, game);
 		Player playerTwo = playerRepo.findPlayerInRegisteryByEmail(playerTwoEmail);
 		updateGame(game, senderEmail, value);
 		PlayRequestAndResponse response = new PlayRequestAndResponse();
 		if (playerTwo != null) {
-			response = communicationService.sendValueAndRecieveNewValue(playerTwo, value,firstRound, playerTwo.getInputChoice());
+			response = communicationService.sendValueAndRecieveNewValue(playerTwo, value, firstRound,
+					playerTwo.getInputChoice(),playerOneWon);
 			int newValue = extractDataFromResponse(game, firstRound, playerTwo, response);
 			newValue /= 3;
-			/* TODO handle win player 2 won */
+			playerTwoWon = newValue == 1 ? true : false;
 			updateGame(game, playerTwoEmail, newValue);
 			response.setValue(newValue);
 		} else {
-			/* TODO return playerTwo withdraw return you won */
+			playerOneWon = true;
 		}
-		/* TODO if game ended I should remove game and update players */
+		response = endGameIfOneOfPlayersWon(playerOneWon, playerTwoWon, senderEmail, playerTwoEmail, game, response);
 		return response;
+	}
 
+	private PlayRequestAndResponse endGameIfOneOfPlayersWon(boolean playerOneWon, boolean playerTwoWon,
+			String senderEmail, String playerTwoEmail, Game game, PlayRequestAndResponse response) {
+		if (playerOneWon || playerTwoWon) {
+			gameRepo.RemoveGameByGameId(game.getGameId());
+			playerRepo.updatePlayerGameIdAndAvailability(senderEmail, null, true);
+			playerRepo.updatePlayerGameIdAndAvailability(playerTwoEmail, null, true);
+			response.setPlayerStatusEnum(playerOneWon ? PlayerStatusEnum.WON : PlayerStatusEnum.LOST);
+		}
+		return response;
 	}
 
 	private int extractDataFromResponse(Game game, boolean firstRound, Player playerTwo,
@@ -101,11 +112,11 @@ public class GameOfThreeService {
 
 	private void updatePlayerTwoWithHisInputChoice(boolean firstRound, Player playerTwo,
 			PlayRequestAndResponse response) {
-		if(firstRound) {
-		playerTwo.setInputChoice(response.getInputChoice());
-		List<Player> players = new ArrayList<>(1);
-		players.add(playerTwo);
-		playerRepo.updatePlayersList(players);
+		if (firstRound) {
+			playerTwo.setInputChoice(response.getInputChoice());
+			List<Player> players = new ArrayList<>(1);
+			players.add(playerTwo);
+			playerRepo.updatePlayersList(players);
 		}
 	}
 

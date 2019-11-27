@@ -67,11 +67,15 @@ public class CommunicationService {
 	/**
 	 * Used by a player to send a new value (play their turn) during the game
 	 * 
-	 * @param reciever receiver player of the new value
-	 * @param value    the value to be sent
+	 * @param reciever    receiver player of the new value
+	 * @param value       the value to be sent
+	 * @param firstRounds a boolean represent if it is the first round or not
+	 * @param inputchoice it is the choice of player to play (manual/automatic)
+	 * @param playerOnWon a boolean that holds value if eitherPlayer one won or not
 	 * @return true if value reached the other player, false otherwise
 	 */
-	public PlayRequestAndResponse sendValueAndRecieveNewValue(Player reciever, int value, boolean firstRound, String inputChoice) {
+	public PlayRequestAndResponse sendValueAndRecieveNewValue(Player reciever, int value, boolean firstRound,
+			String inputChoice, boolean playerOneWon) {
 		String URI = buildURI(reciever, playPathValue);
 		ResponseEntity<PlayRequestAndResponse> response = null;
 		try {
