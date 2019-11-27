@@ -82,6 +82,7 @@ public class CommunicationService {
 			URI = addQueryParam(URI, "value", String.valueOf(value));
 			URI = addQueryParam(URI, "firstRound", String.valueOf(firstRound));
 			URI = addQueryParam(URI, "inputChoice", inputChoice);
+			URI = addQueryParam(URI, "playerOneWon", String.valueOf(playerOneWon));
 			response = restTemplate.getForEntity(URI, PlayRequestAndResponse.class);
 		} catch (RestClientException e) {
 			// TODO handle communicationExecption
