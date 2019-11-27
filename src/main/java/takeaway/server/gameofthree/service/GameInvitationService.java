@@ -15,6 +15,7 @@ import takeaway.server.gameofthree.dto.GameInvitationStatusEnum;
 import takeaway.server.gameofthree.dto.Player;
 import takeaway.server.gameofthree.exception.BusinessException;
 import takeaway.server.gameofthree.exception.GameCreationException;
+import takeaway.server.gameofthree.exception.RulesViolatedException;
 import takeaway.server.gameofthree.util.GameOfThreeUtil;
 
 /**
@@ -53,9 +54,11 @@ public class GameInvitationService {
 	 *                           player is not available for a new game
 	 */
 	public GameInvitationStatusEnum startGame(String receiverEmail) throws BusinessException {
-		/* TODO make sure receiver and sender are not same person */
 		String senderEmail = gameOfThreeUtil.extractSenderEmailFromSecurityContext();
 		Player receiver = gameOfThreeUtil.retrievePlayerIfRegisteredAndAvailable(receiverEmail);
+		if(senderEmail.equals(receiverEmail)) {
+			throw new RulesViolatedException();
+		}
 		GameInvitationStatusEnum status = sendGameInvitation(senderEmail, receiver);
 		if (GameInvitationStatusEnum.ACCEPTED.equals(status)) {
 			startGame(receiverEmail, senderEmail);

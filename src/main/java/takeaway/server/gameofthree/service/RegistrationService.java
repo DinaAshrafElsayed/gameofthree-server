@@ -34,6 +34,9 @@ public class RegistrationService {
 
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
+	
+	@Autowired
+	private CommunicationService communicationService;
 
 	/**
 	 * Used to register a player in the server
@@ -67,9 +70,7 @@ public class RegistrationService {
 			if (gameId != null && !StringUtils.isEmpty(gameId)) {
 				Game game = gameRepo.findGameById(gameId);
 				if (game != null) {
-					/*
-					 * TODO end Game and announce other player as winner
-					 */
+					handleUserClosingWhileInAGame(game, email);
 					gameRepo.RemoveGameByGameId(gameId);
 				}
 			}
@@ -78,5 +79,13 @@ public class RegistrationService {
 		} else {
 			throw new UserDoesnotExistException();
 		}
+	}
+
+	public void handleUserClosingWhileInAGame(Game game, String senderEmail) {
+		String winner = game.getPlayerOneEmail().equals(senderEmail) ? game.getPlayerTwoEmail()
+				: game.getPlayerOneEmail();
+		playerRepo.updatePlayerGameIdAndAvailability(winner, null, true);
+		Player winnerPlayer = playerRepo.findPlayerInRegisteryByEmail(winner);
+		//TODO announce winner
 	}
 }

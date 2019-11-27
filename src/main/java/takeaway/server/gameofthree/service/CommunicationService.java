@@ -52,13 +52,11 @@ public class CommunicationService {
 			URI = addQueryParam(URI, email, reciever.getEmail());
 			ResponseEntity<GameInvitationResponse> response = restTemplate.getForEntity(URI,
 					GameInvitationResponse.class);
-			// TODO fix me to return GameInvitationResponse
 			if (HttpStatus.OK.equals(response.getStatusCode()))
 				return GameInvitationStatusEnum.ACCEPTED.name().equals(response.getBody().getAcceptInvitationResponse())
 						? GameInvitationStatusEnum.ACCEPTED
 						: GameInvitationStatusEnum.DECLINED;
 		} catch (RestClientException e) {
-			// TODO handle communicationExecption
 			log.error(e.getMessage());
 		}
 		return GameInvitationStatusEnum.DECLINED;
@@ -85,7 +83,7 @@ public class CommunicationService {
 			URI = addQueryParam(URI, "playerOneWon", String.valueOf(playerOneWon));
 			response = restTemplate.getForEntity(URI, PlayRequestAndResponse.class);
 		} catch (RestClientException e) {
-			// TODO handle communicationExecption
+			response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 			log.error(e.getMessage());
 		}
 		return response.getBody();
